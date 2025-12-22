@@ -1,0 +1,44 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: frontend.Dockerfile
+    volumes:
+      - ./frontend/app:/app
+    ports:
+      - "5173:5173"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: backend.Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - dynamodb
+
+  nginx:
+    build:
+      context: ./ops/nginx
+      dockerfile: nginx.Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    command: >
+      -jar DynamoDBLocal.jar
+      -sharedDb
+    ports:
+      - "8001:8000"
+    volumes:
+      - dynamodb_data:/home/dynamodblocal/data
+
+volumes:
+  dynamodb_data:

@@ -1,0 +1,86 @@
+import './App.css';
+import axios from 'axios';
+import { useState } from 'react';
+import { Button } from "@/components/ui/button"
+import { ItemDemo } from "@/components/item"
+
+function App() {
+  const [items, setItems] = useState([]);
+  const [clicked, setClicked] = useState(false);
+
+  const getData = async () => {
+    try {
+      const apiData = await axios.get('/api/v1/items/');
+      setItems(apiData.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onClicked = () => setClicked(prev => !prev);
+  
+  const itemList = () => {
+    if (clicked && items)
+      return <ul> {items.map(item => (<li key={item.id}>{item.id}</li>))}</ul> 
+    }
+
+  return (
+    <>
+      <Button className="bg-red-500 text-white">
+    Test
+  </Button>
+      <h1>DynamoDB GET ITEMS</h1>
+      <div className="card">
+        <Button onClick={() => { {!clicked && getData()}; onClicked(); }}>
+          {clicked ? "Clicked!" : "Click me"}
+        </Button>
+        {itemList()}
+      </div>
+      <div className="flex w-full max-w-md flex-col gap-6">
+        <ItemDemo />
+      </div>
+      
+    </>
+  );
+}
+
+export default App;
+
+import { Plus, Minus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+		Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemTitle,
+} from "@/components/ui/item"
+
+export function ItemDemo() {
+
+	return (
+		<div className="flex w-full max-w-md flex-col gap-6">
+		<Item variant="outline">
+			<ItemContent>
+			<ItemTitle>Basic Item</ItemTitle>
+			<ItemDescription>
+				A simple item with title and description.
+			</ItemDescription>
+			</ItemContent>
+			<ItemActions>
+			<Button	size="icon-sm"
+					variant="outline"
+					className="rounded-full"
+					aria-label="Invite">
+				{ <Plus />}
+			</Button>
+			<Button variant="outline" size="sm">
+				{ <Minus />}
+			</Button>
+			</ItemActions>
+		</Item>
+
+		</div>
+	)
+}
+
