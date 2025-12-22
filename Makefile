@@ -64,7 +64,7 @@ backend-logs:
 	$(COMPOSE) logs -f backend
 
 backend-test:
-	$(COMPOSE) exec backend pytest
+	$(COMPOSE) exec -e PYTHONPATH=/app backend pytest -v
 
 # -------------------------------
 # Frontend (Vite / React)

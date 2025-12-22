@@ -3,17 +3,12 @@ from app.api.v1.router import router as v1_router
 from app.db.dynamodb import get_dynamodb
 from botocore.exceptions import ClientError
 import logging
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+logger = logging.getLogger(__name__)
 
-app.include_router(v1_router, prefix="/api/v1")
-
-@app.get("/api/v1")
-async def root():
-    return {"message": "Hello, World!"}
-
-@app.on_event("startup")
-def create_tables():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     try:
         dynamodb = get_dynamodb()
         existing = dynamodb.meta.client.list_tables()["TableNames"]
@@ -26,11 +21,21 @@ def create_tables():
                 BillingMode="PAY_PER_REQUEST",
             )
             table.wait_until_exists()
+            logger.info("DynamoDB table 'Items' created successfully.")
+        else:
+            logger.info("DynamoDB table 'Items' already exists.")
     except ClientError as err:
         logger.error(
-            "Couldn't create table %s. Here's why: %s: %s",
-            table,
+            "Couldn't create table 'Items'. Here's why: %s: %s",
             err.response["Error"]["Code"],
             err.response["Error"]["Message"],
-            )
+        )
         raise
+
+    yield
+
+    logger.info("Application shutting down...")
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(v1_router, prefix="/api/v1")
