@@ -26,9 +26,7 @@ function App() {
 
   return (
     <>
-      <Button className="bg-red-500 text-white">
-    Test
-  </Button>
+  
       <h1>DynamoDB GET ITEMS</h1>
       <div className="card">
         <Button onClick={() => { {!clicked && getData()}; onClicked(); }}>
