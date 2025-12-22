@@ -1,4 +1,3 @@
-# tests/test_items.py
 from fastapi.testclient import TestClient
 from app.api.api import app
 
